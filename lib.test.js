@@ -6,6 +6,7 @@ const {
   print,
   randomlySelectWord,
   askForALetter,
+  validateInput,
 } = require('./lib');
 
 describe('stringify', () => {
@@ -125,9 +126,9 @@ describe('print', () => {
 describe('randomlySelectWord', () => {
   // Math.random = jest.fn(() => 0.5);
   // Math.random = jest.fn().mockReturnValue(0.5);
-  Math.random = jest.fn();
 
   it('should return any word in the array', () => {
+    Math.random = jest.fn();
     Math.random
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(0.5)
@@ -142,11 +143,45 @@ describe('randomlySelectWord', () => {
   });
 });
 
-jest.mock('readline-sync'); // mocks all the functions in an entire library by setting it equal to a jest.fn()
+jest.mock('readline-sync'); // mocks all the functions in an entire library/module by setting every functino equal to a jest.fn()
 describe('askForALetter', () => {
   it('should return the letter that the user input', () => {
     readlineSync.question.mockReturnValueOnce('a');
     const result = askForALetter();
     expect(result).toBe('a');
+  });
+});
+
+describe('validateInput', () => {
+  it('should only return a single letter when a single letter is passed in', () => {
+    const result = validateInput('a');
+    expect(result).toBe('a');
+  });
+  it('should return the first character if it receives multiple characters', () => {
+    const result = validateInput('string');
+    expect(result).toBe('s');
+  });
+  it('should throw an error with a messge of "Invalid input" if it receives a number', () => {
+    expect.assertions(2);
+    try {
+      validateInput(2);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+      expect(err.message).toBe('Invalid input');
+    }
+  });
+
+  it('should throw an error if it receives an input of undefined', () => {
+    expect(validateInput).toThrow('Invalid input');
+  });
+
+  it('should throw an error if it receives a character that is not a letter', () => {
+    expect(() => {
+      validateInput('2');
+    }).toThrow('Invalid input');
+
+    expect(() => {
+      validateInput('.a');
+    }).toThrow('Invalid input');
   });
 });
